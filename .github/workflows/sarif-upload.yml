@@ -1,0 +1,63 @@
+name: Upload SARIF Results
+
+on:
+  workflow_dispatch:
+    inputs:
+      sarif_file_path:
+        description: 'Path to SARIF file (e.g., cx_result.sarif)'
+        required: true
+        default: 'cx_result.sarif'
+      artifact_name:
+        description: 'Name for the artifact'
+        required: false
+        default: 'SARIF Results'
+
+jobs:
+  upload-sarif:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check if SARIF file exists
+        run: |
+          if [ -f "${{ inputs.sarif_file_path }}" ]; then
+            echo "✓ SARIF file found: ${{ inputs.sarif_file_path }}"
+            echo "File size:"
+            ls -lh "${{ inputs.sarif_file_path }}"
+          else
+            echo "✗ SARIF file not found: ${{ inputs.sarif_file_path }}"
+            echo "Available files:"
+            find . -name "*.sarif" -type f
+            exit 1
+          fi
+
+      - name: Validate SARIF format
+        run: |
+          # Check if it's valid JSON
+          if python3 -m json.tool "${{ inputs.sarif_file_path }}" > /dev/null; then
+            echo "✓ SARIF file is valid JSON"
+          else
+            echo "✗ SARIF file is not valid JSON"
+            exit 1
+          fi
+
+      - name: Upload SARIF as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.artifact_name }}
+          path: ${{ inputs.sarif_file_path }}
+          retention-days: 30
+
+      - name: Upload SARIF to GitHub code scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ inputs.sarif_file_path }}
+
+      - name: Print summary
+        run: |
+          echo "## ✓ SARIF Upload Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**File:** ${{ inputs.sarif_file_path }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Artifact Name:** ${{ inputs.artifact_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Status:** Successfully uploaded to GitHub code scanning" >> $GITHUB_STEP_SUMMARY
