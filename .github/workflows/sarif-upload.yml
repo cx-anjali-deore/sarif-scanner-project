@@ -22,11 +22,11 @@ jobs:
       - name: Check if SARIF file exists
         run: |
           if [ -f "${{ inputs.sarif_file_path }}" ]; then
-            echo "✓ SARIF file found: ${{ inputs.sarif_file_path }}"
+            echo "SARIF file found: ${{ inputs.sarif_file_path }}"
             echo "File size:"
             ls -lh "${{ inputs.sarif_file_path }}"
           else
-            echo "✗ SARIF file not found: ${{ inputs.sarif_file_path }}"
+            echo "SARIF file not found: ${{ inputs.sarif_file_path }}"
             echo "Available files:"
             find . -name "*.sarif" -type f
             exit 1
@@ -34,11 +34,10 @@ jobs:
 
       - name: Validate SARIF format
         run: |
-          # Check if it's valid JSON
           if python3 -m json.tool "${{ inputs.sarif_file_path }}" > /dev/null; then
-            echo "✓ SARIF file is valid JSON"
+            echo "SARIF file is valid JSON"
           else
-            echo "✗ SARIF file is not valid JSON"
+            echo "SARIF file is not valid JSON"
             exit 1
           fi
 
@@ -56,8 +55,8 @@ jobs:
 
       - name: Print summary
         run: |
-          echo "## ✓ SARIF Upload Complete" >> $GITHUB_STEP_SUMMARY
+          echo "SARIF Upload Complete" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**File:** ${{ inputs.sarif_file_path }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Artifact Name:** ${{ inputs.artifact_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Status:** Successfully uploaded to GitHub code scanning" >> $GITHUB_STEP_SUMMARY
+          echo "File: ${{ inputs.sarif_file_path }}" >> $GITHUB_STEP_SUMMARY
+          echo "Artifact Name: ${{ inputs.artifact_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "Status: Successfully uploaded to GitHub code scanning" >> $GITHUB_STEP_SUMMARY
