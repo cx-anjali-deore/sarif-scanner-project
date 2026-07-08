@@ -12,6 +12,10 @@ on:
         required: false
         default: 'SARIF Results'
 
+permissions:
+  contents: read
+  security-events: write
+
 jobs:
   upload-sarif:
     runs-on: ubuntu-latest
